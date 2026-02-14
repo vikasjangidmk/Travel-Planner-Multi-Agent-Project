@@ -1,16 +1,38 @@
-import os
-from dotenv import load_dotenv
 from google.adk.agents import Agent
+from google.adk.tools.agent_tool import AgentTool
+from travel_planner.tools import google_search_grounding, location_search_tool
 
-load_dotenv()
 
-# Force set environment variables for LiteLLM
-os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
-os.environ["OPENAI_BASE_URL"] = "https://openrouter.ai/api/v1"
+LLM= "gemini-2.0-flash"
 
-LLM = "openai/gpt-4o-mini"
 
-root_agent = Agent(
+news_agent = Agent(
+    model=LLM,
+    name="news_agent",
+    description="Suggests key travel events and news; uses search for current info.",
+    instruction="""
+            You are responsible for providing a list of events and news recommendations based on the user's query. 
+            Limit the choices to 10 results. You need to use the google_search_grounding agent tool to search the web for information.
+        """,
+    tools=[google_search_grounding]    
+)
+
+
+places_agent = Agent(
+    model=LLM,
+    name="places_agent",
+    description="Suggests locations based on user preferences",
+    instruction="""
+            You are responsible for making suggestions on actual places based on the user's query. Limit the choices to 10 results.
+            Each place must have a name, location, and address.
+            You can use the places_tool to find the latitude and longitude of the place and address.
+        """,
+    tools=[location_search_tool]    
+)
+
+
+
+travel_inspiration_agent = Agent(
     model=LLM,
     name="travel_inspiration_agent",
     description="Inspires users with travel ideas. It may consult news and place agents",
@@ -24,4 +46,6 @@ root_agent = Agent(
         - Use `news_agent` to provide key events and news recommendations based on the user's query.
         - Use `places_agent` to provide a list of locations or nearby places to famous locations when user asks for it, for example "find hotels near eiffel tower", should return nearby hotels given some user preferences.
         """,
+    tools=[AgentTool(agent=news_agent), AgentTool(agent=places_agent)]
 )
+

@@ -3,3 +3,4 @@ google-adk
 python-dotenv
 langgraph
 openai
+geopy

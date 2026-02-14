@@ -1,14 +1,9 @@
-import os
-from dotenv import load_dotenv
 from google.adk.agents import Agent
 
-load_dotenv()
 
-# Force set environment variables for LiteLLM
-os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
-os.environ["OPENAI_BASE_URL"] = "https://openrouter.ai/api/v1"
+from travel_planner.supporting_agents import travel_inspiration_agent
 
-LLM = "openai/gpt-4o-mini"
+LLM="gemini-2.0-flash-001"
 
 root_agent = Agent(
     model=LLM,
@@ -20,4 +15,5 @@ root_agent = Agent(
             - Use the inspiration_agent to get the best destination, news, places nearby e.g hotels, cafes, etc near attractions and points of interest for the user.
             - You cannot use any tool directly. 
             """,
+    sub_agents=[travel_inspiration_agent]
 )
